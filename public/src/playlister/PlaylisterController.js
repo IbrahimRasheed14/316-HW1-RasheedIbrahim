@@ -65,25 +65,46 @@ export default class PlaylisterController {
             // CLOSE THE MODAL
             let editSongModal = document.getElementById("edit-song-modal");
             editSongModal.classList.remove("is-visible");
+            document.body.classList.remove("modal-open")
         }
 
-        // RESPOND TO THE USER CONFIRMING TO DELETE A PLAYLIST
-        document.getElementById("delete-list-confirm-button").onclick = (event) => {
-            // NOTE THAT WE SET THE ID OF THE LIST TO REMOVE
-            // IN THE MODEL OBJECT AT THE TIME THE ORIGINAL
-            // BUTTON PRESS EVENT HAPPENED
-            let deleteListId = this.model.getDeleteListId();
-
-            // DELETE THE LIST, THIS IS NOT UNDOABLE
-            this.model.deleteList(deleteListId);
-
+        // RESPOND TO THE USER CLOSING THE EDIT SONG MODAL VIA THE CANCEL BUTTON
+        document.getElementById("edit-song-confirm-button").onclick = (event) => {
             // ALLOW OTHER INTERACTIONS
+            let songIndex = this.model.getEditSongIndex();
+            let song = this.model.getSong(songIndex);
+
+            song.title = document.getElementById("edit-song-modal-title-textfield").value;
+            song.year = document.getElementById("edit-song-modal-year-textfield").value;
+            song.artist = document.getElementById("edit-song-modal-artist-textfield").value;
+            song.youTubeId = document.getElementById("edit-song-modal-youTubeId-textfield").value;
+
+            this.model.view.refreshSongCards(this.model.currentList);
+            this.model.saveLists();
+
             this.model.toggleConfirmDialogOpen();
 
             // CLOSE THE MODAL
+            let editSongModal = document.getElementById("edit-song-modal");
+            editSongModal.classList.remove("is-visible");
+            document.body.classList.remove("modal-open")
+        }
+
+
+
+        // RESPOND TO THE USER CONFIRMING TO DELETE A PLAYLIST
+        document.getElementById("delete-list-confirm-button").onclick = (event) => {
+            let deleteListId = this.model.getDeleteListId();  // get the id we stored earlier
+
+            // 🔑 Call the model's delete method
+            this.model.deleteList(deleteListId);
+
+            this.model.toggleConfirmDialogOpen();
             let deleteListModal = document.getElementById("delete-list-modal");
             deleteListModal.classList.remove("is-visible");
-        }
+            document.body.classList.remove("modal-open")
+
+}
 
         // RESPOND TO THE USER CLOSING THE DELETE PLAYLIST MODAL
         document.getElementById("delete-list-cancel-button").onclick = (event) => {
@@ -93,6 +114,8 @@ export default class PlaylisterController {
             // CLOSE THE MODAL
             let deleteListModal = document.getElementById("delete-list-modal");
             deleteListModal.classList.remove("is-visible");
+            document.body.classList.remove("modal-open")
+
         }
     }
 
@@ -116,6 +139,18 @@ export default class PlaylisterController {
                 this.model.loadList(id);
             }
         }
+        // HANDLES ADDING A PLAYLIST
+        document.getElementById("add-playlist-button-").onmousedown = (event) => {
+            this.ignoreParentClick(event);
+            this.model.addNewList("Untitled", []);
+        }
+
+         // HANDLES DUPLICATING A PLAYLIST
+        document.getElementById("duplicate-list-button-").onmousedown = (event) => {
+            this.ignoreParentClick(event);
+            this.model.addList("Copy", []);
+        }
+
         // HANDLES DELETING A PLAYLIST
         document.getElementById("delete-list-button-" + id).onmousedown = (event) => {
             // DON'T PROPOGATE THIS INTERACTION TO LOWER-LEVEL CONTROLS
@@ -136,8 +171,10 @@ export default class PlaylisterController {
 
             // OPEN UP THE DIALOG
             deleteListModal.classList.add("is-visible");
+            document.body.classList.add("modal-open")
             this.model.toggleConfirmDialogOpen();
         }
+            
         // FOR RENAMING THE LIST NAME
         document.getElementById("playlist-card-" + id).ondblclick = (event) => {
             let text = document.getElementById("playlist-card-text-" + id)
@@ -193,12 +230,14 @@ export default class PlaylisterController {
 
                 // LOAD THE SONG DATA INTO THE MODAL
                 document.getElementById("edit-song-modal-title-textfield").value = song.title;
+                document.getElementById("edit-song-modal-year-textfield").value = song.year;
                 document.getElementById("edit-song-modal-artist-textfield").value = song.artist;
                 document.getElementById("edit-song-modal-youTubeId-textfield").value = song.youTubeId;
 
                 // OPEN UP THE MODAL
                 let editSongModal = document.getElementById("edit-song-modal");
                 editSongModal.classList.add("is-visible");
+                document.body.classList.add("modal-open");
 
                 // IGNORE ALL NON-MODAL EVENTS
                 this.model.toggleConfirmDialogOpen();
@@ -211,11 +250,54 @@ export default class PlaylisterController {
                 this.ignoreParentClick(event);
 
                 // RECORD WHICH SONG SO THE MODAL KNOWS AND UPDATE THE MODAL TEXT
-                let songIndex = Number.parseInt(event.target.id.split("-")[2]);               
+                let songIndex = Number.parseInt(event.target.id.split("-")[2]);   
+                let song = this.model.getSong(songIndex);
+
+                document.getElementById("delete-song-title").textContent = song.title;
+
+                let modal = document.getElementById("delete-song-modal");
+                modal.dataset.songIndex = String(songIndex);
+
 
                 // PROCESS THE REMOVE SONG EVENT
-                this.model.addTransactionToRemoveSong(songIndex);
-            }
+                modal.classList.add("is-visible");
+                document.body.classList.add("modal-open");
+                this.model.toggleConfirmDialogOpen();
+
+                            
+                // RESPOND TO THE USER CONFIRMING TO DELETE A SONG
+                document.getElementById("delete-song-confirm-button").onclick = (event) => {
+                
+                let modal = document.getElementById("delete-song-modal");
+                let id = Number(modal.dataset.songIndex);
+               
+                this.model.addTransactionToRemoveSong(id);
+
+                modal.classList.remove("is-visible");
+                document.body.classList.remove("modal-open");
+                this.model.toggleConfirmDialogOpen();
+
+                }
+
+                // RESPOND TO THE USER CLOSING THE DELETE PLAYLIST MODAL
+                document.getElementById("delete-song-cancel-button").onclick = (event) => {
+                // ALLOW OTHER INTERACTIONS
+                let modal = document.getElementById("delete-song-modal");
+            
+                modal.classList.remove("is-visible");
+                document.body.classList.remove("modal-open");
+                this.model.toggleConfirmDialogOpen();
+        }
+    
+
+
+
+ }
+
+
+            
+
+
 
             // NOW SETUP ALL CARD DRAGGING HANDLERS AS THE USER MAY WISH TO CHANGE
             // THE ORDER OF SONGS IN THE PLAYLIST

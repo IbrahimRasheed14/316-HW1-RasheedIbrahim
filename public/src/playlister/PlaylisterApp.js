@@ -56,7 +56,15 @@ export class PlaylisterApp {
                         songs[j] = listData.songs[j];
                     }
                     modelToUpdate.addNewList(listData.name, songs);
+                    
                 }
+                modelToUpdate.addNewList(listData.name, songs);
+                    modelToUpdate.view.updateToolbarButtons(
+                    modelToUpdate.hasCurrentList(),
+                    modelToUpdate.confirmDialogOpen,
+                    modelToUpdate.tps.hasTransactionToDo(),
+                    modelToUpdate.tps.hasTransactionToUndo()
+                    );
             }
         };
         xmlhttp.open("GET", jsonFilePath, true);
@@ -79,8 +87,14 @@ export class PlaylisterApp {
         if (!success) {
             this.loadListsFromJSON("./data/default_lists.json");
         }
+        this.view.updateToolbarButtons(
+            this.model.hasCurrentList(),
+            this.model.confirmDialogOpen,
+            this.model.tps.hasTransactionToDo(),
+            this.model.tps.hasTransactionToUndo()
+        );
+        }
     }
-}
 
 /**
  * This callback is where our application begins as this function is invoked once the HTML page

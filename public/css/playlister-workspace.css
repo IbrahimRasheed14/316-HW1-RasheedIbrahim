@@ -11,6 +11,7 @@
   --swatch-accent: #669966; 
   --swatch-status: #123456;
   --swatch-link-emphasis: #b88320;
+  --swatch-artist-name:red;
   --swatch-link-contrast:lightgreen;
   --swatch-link-hover:pink;
   --switch-link-active: magenta;
@@ -168,6 +169,10 @@ body {
   color: var(--swatch-link-emphasis);
 }
 
+.song-card-artist {
+  color: var(--swatch-artist-name);
+}
+
 .playlist-card:hover,
 .song-card:hover .song-card-title {
   color: var(--swatch-link-contrast);
@@ -190,9 +195,10 @@ body {
   color: black;
 }
 
-.song-card-artist {
-  color: red;
+.song-card .song-card-artist { 
+  color: red; 
 }
+
 
 .is-dragging {
   border: 2px black solid;
@@ -206,4 +212,13 @@ body {
   border-style: solid;
   box-shadow: 2px 4px #888888;
   border-radius: 5px;
+}
+body.modal-open #playlist-cards,
+body.modal-open #song-cards {
+  pointer-events: none;   
+}
+
+.modal,
+.modal * {
+  pointer-events: auto;
 }

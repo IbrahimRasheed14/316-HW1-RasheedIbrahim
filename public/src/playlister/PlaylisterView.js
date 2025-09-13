@@ -107,6 +107,7 @@ export default class PlaylisterView {
     hidePlaylistTextInput(id) {
         document.getElementById("playlist-card-text-" + id).hidden = false;
         document.getElementById("playlist-card-text-input-" + id).hidden = true;
+        this.enableButton("add-playlist-button-")
     }
 
     /**
@@ -170,12 +171,17 @@ export default class PlaylisterView {
             itemDiv.classList.add("unselected-song-card");
             itemDiv.id = "song-card-" + (i + 1);
 
+        
             // HAVE THE TEXT LINK TO THE YOUTUBE VIDEO
             let youTubeLink = document.createElement("a");
             youTubeLink.classList.add("song-card-title");
             youTubeLink.href = "https://www.youtube.com/watch?v=" + song.youTubeId;
             youTubeLink.target = 1;
             youTubeLink.innerHTML = song.title;
+
+            let yearSpan = document.createElement("span");
+            yearSpan.class = "song-card-year";
+            yearSpan.innerHTML = "("+song.year+")";
 
             let bySpan = document.createElement("span");
             bySpan.class = "song-card-by";
@@ -184,11 +190,14 @@ export default class PlaylisterView {
             let artistSpan = document.createElement("span");
             artistSpan.class = "song-card-artist";
             artistSpan.innerHTML = song.artist;
+            artistSpan.classList.add("song-card-artist");
+
 
             // PUT THE CONTENT INTO THE CARD
             let songNumber = document.createTextNode("" + (i + 1) + ". ");
             itemDiv.appendChild(songNumber);
             itemDiv.appendChild(youTubeLink);
+            itemDiv.appendChild(yearSpan);
             itemDiv.appendChild(bySpan);
             itemDiv.appendChild(artistSpan);
 
@@ -231,6 +240,7 @@ export default class PlaylisterView {
     showPlaylistTextInput(id) {
         document.getElementById("playlist-card-text-" + id).hidden = true;
         document.getElementById("playlist-card-text-input-" + id).hidden = false;
+        this.disableButton("add-playlist-button-")
     }
 
     /**
@@ -262,13 +272,17 @@ export default class PlaylisterView {
      * buttons cannot be used they are disabled.
      */
     updateToolbarButtons(hasCurrentList, isConfirmDialogOpen, hasTransactionToDo, hasTransactionToUndo) {
-        this.enableButton("close-button");
-        this.enableButton("add-song-button");
-        if (!hasTransactionToUndo) {
-            this.disableButton("undo-button");
+
+        if (hasCurrentList && !isConfirmDialogOpen) this.enableButton('add-song-button');
+        else this.disableButton('add-song-button');
+
+        if (hasTransactionToUndo && !isConfirmDialogOpen) this.enableButton('undo-button');
+        else this.disableButton('undo-button');
+
+        if (hasTransactionToDo && !isConfirmDialogOpen) this.enableButton('redo-button');
+        else this.disableButton('redo-button');
+
+        if (hasCurrentList && !isConfirmDialogOpen) this.enableButton('close-button');
+        else this.disableButton('close-button');
         }
-        else {
-            this.enableButton("undo-button");
-        }
-    }
 }
